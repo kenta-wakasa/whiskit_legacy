@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:whiskit_app/main_model.dart';
+import 'package:whiskit_app/whisky_list_page.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -32,8 +36,11 @@ class MyApp extends StatelessWidget {
                   RaisedButton(
                     child: Text('ボタン'),
                     onPressed: () {
-                      // ここでなにかやる
-                      model.changeText();
+                      // 画面遷移
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => WhiskyList() )
+                      );
                     },
                   ),
                 ],
