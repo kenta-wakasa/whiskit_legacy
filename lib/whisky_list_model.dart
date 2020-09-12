@@ -6,7 +6,9 @@ class WhiskyListModel extends ChangeNotifier {
   List<Whisky> whisky = [];
   Future fetchWhisky() async {
     final docs = await FirebaseFirestore.instance.collection('whisky').get();
-    final whisky = docs.docs.map((doc) => Whisky(doc.data()['name'])).toList();
+    final whisky = docs.docs
+        .map((doc) => Whisky(doc.data()['name'], doc.data()['imageURL']))
+        .toList();
     this.whisky = whisky;
     notifyListeners();
   }

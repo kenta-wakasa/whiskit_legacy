@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:whiskit_app/whisky_details_page.dart';
 import 'package:whiskit_app/whisky_list_model.dart';
 
 class WhiskyListPage extends StatelessWidget {
@@ -11,7 +12,7 @@ class WhiskyListPage extends StatelessWidget {
       create: (_) => WhiskyListModel()..fetchWhisky(),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('ウイスキ一覧'),
+          title: Text('ジャパニーズ'),
         ),
         body: Consumer<WhiskyListModel>(
           builder: (context, model, child) {
@@ -19,11 +20,20 @@ class WhiskyListPage extends StatelessWidget {
             final listTiles = whisky
                 .map(
                   (whisky) => ListTile(
-                    title: Text(whisky.name),
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                WhiskyDetailsPage(name: whisky.name)),
+                      );
+                    },
+                    title: Image.network(whisky.imageURL),
                   ),
                 )
                 .toList();
-            return ListView(
+            return GridView.count(
+              crossAxisCount: 3,
               children: listTiles,
             );
           },
