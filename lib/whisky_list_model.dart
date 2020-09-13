@@ -4,10 +4,15 @@ import 'package:whiskit_app/whisky.dart';
 
 class WhiskyListModel extends ChangeNotifier {
   List<Whisky> whisky = [];
-  Future fetchWhisky() async {
-    final docs = await FirebaseFirestore.instance.collection('whisky').get();
+  Future fetchWhisky(String country) async {
+    final docs = await FirebaseFirestore.instance
+        .collection('whisky')
+        .where('country', isEqualTo: country)
+        .get();
     final whisky = docs.docs
-        .map((doc) => Whisky(doc.data()['name'], doc.data()['imageURL']))
+        .map(
+          (doc) => Whisky(doc.data()['name'], doc.data()['imageURL']),
+        )
         .toList();
     this.whisky = whisky;
     notifyListeners();

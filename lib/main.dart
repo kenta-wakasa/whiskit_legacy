@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:whiskit_app/main_model.dart';
-import 'package:whiskit_app/singup_page.dart';
-import 'package:whiskit_app/whisky_list_page.dart';
+import 'package:whiskit_app/sample_tab_page.dart';
 import 'package:firebase_core/firebase_core.dart';
-
-import 'login_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,64 +10,130 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Whiskit',
-      home: ChangeNotifierProvider<MainModel>(
-        create: (_) => MainModel(),
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text(
-              'ウイスキット'
-            ),
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: ChangeNotifierProvider<BottomNavigationBarProvider>(
+        child: BottomNavigationBarExample(),
+        create: (_) => BottomNavigationBarProvider(),
+      ),
+    );
+  }
+}
+
+class BottomNavigationBarExample extends StatefulWidget {
+  @override
+  _BottomNavigationBarExampleState createState() =>
+      _BottomNavigationBarExampleState();
+}
+
+class _BottomNavigationBarExampleState
+    extends State<BottomNavigationBarExample> {
+  var currentTab = [
+    SampleTabPage(),
+    Profile(),
+    Setting(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    var provider = Provider.of<BottomNavigationBarProvider>(context);
+    return Scaffold(
+      body: currentTab[provider.currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: provider.currentIndex,
+        onTap: (index) {
+          provider.currentIndex = index;
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: new Icon(Icons.home),
+            title: new Text('Home'),
           ),
-          body: Consumer<MainModel>( builder: (context, model, child) {
-            return Center(
-              child: Column(
-                children: [
-                  Text(
-                    model.testText,
-                    style: TextStyle(
-                      fontSize: 20,
-                    ),
-                  ),
-                  RaisedButton(
-                    child: Text('ウイスキ一覧'),
-                    onPressed: () {
-                      // 画面遷移
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => WhiskyListPage() )
-                      );
-                    },
-                  ),
-                  RaisedButton(
-                    child: Text('新規登録'),
-                    onPressed: () {
-                      // 画面遷移
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => SignUpPage() )
-                      );
-                    },
-                  ),
-                  RaisedButton(
-                    child: Text('ログイン'),
-                    onPressed: () {
-                      // 画面遷移
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => LoginPage() )
-                      );
-                    },
-                  ),
-                ],
-              ),
-            );
-          }),
+          BottomNavigationBarItem(
+            icon: new Icon(Icons.person),
+            title: new Text('Profile'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            title: Text('Settings'),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class Home extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+          child: Container(
+        alignment: Alignment.center,
+        height: 300,
+        width: 300,
+        child: Text(
+          "Home",
+          style: TextStyle(color: Colors.white, fontSize: 30),
+        ),
+        color: Colors.amber,
+      )),
+    );
+  }
+}
+
+class Profile extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Container(
+          alignment: Alignment.center,
+          height: 300,
+          width: 300,
+          child: Text(
+            "Profile",
+            style: TextStyle(color: Colors.white, fontSize: 30),
+          ),
+          color: Colors.blue,
         ),
       ),
     );
+  }
+}
+
+class Setting extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+          child: Container(
+        alignment: Alignment.center,
+        height: 300,
+        width: 300,
+        child: Text(
+          "Settings",
+          style: TextStyle(color: Colors.white, fontSize: 30),
+        ),
+        color: Colors.cyan,
+      )),
+    );
+  }
+}
+
+class BottomNavigationBarProvider with ChangeNotifier {
+  int _currentIndex = 0;
+
+  get currentIndex => _currentIndex;
+
+  set currentIndex(int index) {
+    _currentIndex = index;
+    notifyListeners();
   }
 }
