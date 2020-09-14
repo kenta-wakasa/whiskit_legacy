@@ -6,7 +6,7 @@ import 'package:whiskit_app/whisky_details_page.dart';
 import 'package:whiskit_app/whisky_list_model.dart';
 
 class WhiskyListPage extends StatelessWidget {
-  final country = 'japanese';
+  final country = '';
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<WhiskyListModel>(

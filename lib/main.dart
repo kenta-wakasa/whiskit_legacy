@@ -46,6 +46,8 @@ class _BottomNavigationBarExampleState
     return Scaffold(
       body: currentTab[provider.currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.black,
+        unselectedItemColor: Colors.white70,
         currentIndex: provider.currentIndex,
         onTap: (index) {
           provider.currentIndex = index;
