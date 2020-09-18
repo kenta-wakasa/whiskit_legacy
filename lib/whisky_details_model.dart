@@ -11,7 +11,15 @@ class WhiskyDetailsModel extends ChangeNotifier {
         .get();
     final whiskyDetails = docs.docs
         .map(
-          (doc) => WhiskyDetails(doc.data()['name'], doc.data()['imageURL']),
+          (doc) => WhiskyDetails(
+              doc.data()['brand'],
+              doc.data()['imageURL'],
+              doc.data()['name'],
+              doc.data()['distillery'],
+              doc.data()['style'],
+              doc.data()['alcohol'],
+              doc.data()['rakuten'],
+              doc.data()['amazon']),
         )
         .toList();
     this.whiskyDetails = whiskyDetails;

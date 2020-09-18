@@ -28,7 +28,7 @@ class SampleTabPage extends StatelessWidget {
       length: _tab.length,
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.black87,
+          backgroundColor: Colors.black54,
           title: TabBar(
             tabs: _tab,
           ),
@@ -71,7 +71,6 @@ class TabPage extends StatelessWidget {
     return ChangeNotifierProvider<WhiskyListModel>(
       create: (_) => WhiskyListModel()..fetchWhisky(country),
       child: Scaffold(
-        backgroundColor: Colors.black87,
         body: Consumer<WhiskyListModel>(
           builder: (context, model, child) {
             final whisky = model.whisky;
@@ -91,6 +90,7 @@ class TabPage extends StatelessWidget {
                 )
                 .toList();
             return GridView.count(
+              scrollDirection: Axis.vertical,
               crossAxisCount: 5,
               padding: const EdgeInsets.all(10),
               childAspectRatio: 4 / 5,

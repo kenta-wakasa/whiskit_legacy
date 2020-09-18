@@ -1,12 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:whiskit_app/sample_tab_page.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:whiskit_app/login_page.dart';
+import 'package:whiskit_app/twitter_login_page.dart';
+import 'package:whiskit_app/whisky_list_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
+
+  // uid の存在を確認
+  SharedPreferences prefsRead = await SharedPreferences.getInstance();
+  String _uid = prefsRead.getString('uid');
+  print(_uid);
+  // uidが空ならログインページに飛ばす。
+  if (_uid == '') {
+    runApp(TwitterLoginPage());
+  } else {
+    runApp(MyApp());
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -16,7 +29,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
+        primaryColor: Colors.lightBlue[800],
+        accentColor: Colors.cyan[600],
       ),
       home: ChangeNotifierProvider<BottomNavigationBarProvider>(
         child: BottomNavigationBarExample(),
@@ -35,9 +50,10 @@ class BottomNavigationBarExample extends StatefulWidget {
 class _BottomNavigationBarExampleState
     extends State<BottomNavigationBarExample> {
   var currentTab = [
-    SampleTabPage(),
+    Home(),
+    WhiskyListPage(),
     Profile(),
-    Setting(),
+    TwitterLoginPage(),
   ];
 
   @override
@@ -46,26 +62,33 @@ class _BottomNavigationBarExampleState
     return Scaffold(
       body: currentTab[provider.currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.black54,
         unselectedItemColor: Colors.white70,
+        showUnselectedLabels: true,
+        selectedItemColor: Colors.cyan[600],
         currentIndex: provider.currentIndex,
         onTap: (index) {
           provider.currentIndex = index;
         },
         items: [
           BottomNavigationBarItem(
-            icon: new Icon(Icons.home),
-            title: new Text('Home'),
+            icon: Icon(Icons.home),
+            label: 'ホーム',
           ),
           BottomNavigationBarItem(
-            icon: new Icon(Icons.person),
-            title: new Text('Profile'),
+            icon: Icon(Icons.search),
+            label: '探す',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'マイページ',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            title: Text('Settings'),
+            label: '設定',
           )
         ],
+        type: BottomNavigationBarType.fixed,
       ),
     );
   }
@@ -100,7 +123,7 @@ class Profile extends StatelessWidget {
           height: 300,
           width: 300,
           child: Text(
-            "Profile",
+            "マイページ",
             style: TextStyle(color: Colors.white, fontSize: 30),
           ),
           color: Colors.blue,

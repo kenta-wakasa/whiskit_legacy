@@ -4,7 +4,20 @@ import 'package:whiskit_app/whisky.dart';
 
 class WhiskyListModel extends ChangeNotifier {
   List<Whisky> whisky = [];
+  bool isLoading = false;
+
+  startLoading() {
+    isLoading = true;
+    notifyListeners();
+  }
+
+  endLoading() {
+    isLoading = false;
+    notifyListeners();
+  }
+
   Future fetchWhisky(String country) async {
+    startLoading();
     final docs = await FirebaseFirestore.instance
         .collection('whisky')
         .where('country', isEqualTo: country)
@@ -15,6 +28,7 @@ class WhiskyListModel extends ChangeNotifier {
         )
         .toList();
     this.whisky = whisky;
+    endLoading();
     notifyListeners();
   }
 }

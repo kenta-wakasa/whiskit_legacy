@@ -1,5 +1,3 @@
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -11,10 +9,10 @@ class LoginModel extends ChangeNotifier {
 
   Future login() async {
     if (mail.isEmpty) {
-      throw('メールアドレスを入力してください');
+      throw ('メールアドレスを入力してください');
     }
     if (password.isEmpty) {
-      throw('パスワードを入力してください');
+      throw ('パスワードを入力してください');
     }
 
     final result = await _auth.signInWithEmailAndPassword(
