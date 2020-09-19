@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'main.dart';
+import 'presentation/main/main.dart';
 
 class TwitterLoginPage extends StatelessWidget {
   @override
@@ -92,7 +92,7 @@ class _AuthPageState extends State {
         })
         .then((value) => print("User Added"))
         .catchError((error) => print("Failed to add user: $error"));
-    // ToDo; 端末にuidを保存
+    // 端末にuidを保存
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('uid', user.uid);
     login();
@@ -104,7 +104,7 @@ class _AuthPageState extends State {
 
   void signOutTwitter() async {
     await twitterLogin.logOut();
-    // ToDo: 端末からuidを削除
+    // 端末からuidを削除
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('uid', '');
     logout();

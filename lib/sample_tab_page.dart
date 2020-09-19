@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:whiskit_app/whisky_details_page.dart';
-import 'package:whiskit_app/whisky_list_model.dart';
+import 'package:whiskit_app/presentation/whisky_details/whisky_details_page.dart';
+import 'package:whiskit_app/presentation/whisky_list/whisky_list_model.dart';
 
 class SampleTabPage extends StatelessWidget {
   final _tab = <Tab>[
@@ -82,7 +82,7 @@ class TabPage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                WhiskyDetailsPage(name: whisky.name)),
+                                WhiskyDetailsPage(documentID: whisky.name)),
                       );
                     },
                     title: Image.network(whisky.imageURL),

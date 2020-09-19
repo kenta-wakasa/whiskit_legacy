@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:whiskit_app/login_page.dart';
-import 'package:whiskit_app/twitter_login_page.dart';
-import 'package:whiskit_app/whisky_list_page.dart';
+import 'package:whiskit_app/presentation/setting/setting_page.dart';
+import 'package:whiskit_app/presentation/start/start_page.dart';
+import 'package:whiskit_app/presentation/whisky_list/whisky_list_page.dart';
+import '../home/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
   // uid の存在を確認
   SharedPreferences prefsRead = await SharedPreferences.getInstance();
   String _uid = prefsRead.getString('uid');
   print(_uid);
   // uidが空ならログインページに飛ばす。
   if (_uid == '') {
-    runApp(TwitterLoginPage());
+    runApp(StartPage());
   } else {
     runApp(MyApp());
   }
@@ -53,7 +53,7 @@ class _BottomNavigationBarExampleState
     Home(),
     WhiskyListPage(),
     Profile(),
-    TwitterLoginPage(),
+    SettingPage(),
   ];
 
   @override
@@ -94,25 +94,6 @@ class _BottomNavigationBarExampleState
   }
 }
 
-class Home extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-          child: Container(
-        alignment: Alignment.center,
-        height: 300,
-        width: 300,
-        child: Text(
-          "Home",
-          style: TextStyle(color: Colors.white, fontSize: 30),
-        ),
-        color: Colors.amber,
-      )),
-    );
-  }
-}
-
 class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -133,30 +114,11 @@ class Profile extends StatelessWidget {
   }
 }
 
-class Setting extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-          child: Container(
-        alignment: Alignment.center,
-        height: 300,
-        width: 300,
-        child: Text(
-          "Settings",
-          style: TextStyle(color: Colors.white, fontSize: 30),
-        ),
-        color: Colors.cyan,
-      )),
-    );
-  }
-}
-
 class BottomNavigationBarProvider with ChangeNotifier {
   int _currentIndex = 0;
-
+  // getter
   get currentIndex => _currentIndex;
-
+  // setter
   set currentIndex(int index) {
     _currentIndex = index;
     notifyListeners();

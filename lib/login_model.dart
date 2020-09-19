@@ -19,7 +19,5 @@ class LoginModel extends ChangeNotifier {
       email: mail,
       password: password,
     );
-    final uid = result.user.uid;
-    // ToDo 端末に保存
   }
 }

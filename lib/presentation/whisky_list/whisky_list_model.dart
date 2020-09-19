@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:whiskit_app/whisky.dart';
+import 'package:whiskit_app/domain/whisky.dart';
 
 class WhiskyListModel extends ChangeNotifier {
   List<Whisky> whisky = [];
@@ -24,7 +24,7 @@ class WhiskyListModel extends ChangeNotifier {
         .get();
     final whisky = docs.docs
         .map(
-          (doc) => Whisky(doc.data()['name'], doc.data()['imageURL']),
+          (doc) => Whisky(doc.data()['name'], doc.data()['imageURL'], doc.id),
         )
         .toList();
     this.whisky = whisky;
