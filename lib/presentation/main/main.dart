@@ -6,6 +6,7 @@ import 'package:whiskit_app/presentation/setting/setting_page.dart';
 import 'package:whiskit_app/presentation/start/start_page.dart';
 import 'package:whiskit_app/presentation/whisky_list/whisky_list_page.dart';
 import '../home/home_page.dart';
+import 'bottom_navigation_bar_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,7 +51,7 @@ class BottomNavigationBarExample extends StatefulWidget {
 class _BottomNavigationBarExampleState
     extends State<BottomNavigationBarExample> {
   var currentTab = [
-    Home(),
+    HomePage(),
     WhiskyListPage(),
     Profile(),
     SettingPage(),
@@ -62,6 +63,8 @@ class _BottomNavigationBarExampleState
     return Scaffold(
       body: currentTab[provider.currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        selectedFontSize: 8,
+        unselectedFontSize: 8,
         backgroundColor: Colors.black54,
         unselectedItemColor: Colors.white70,
         showUnselectedLabels: true,
@@ -77,7 +80,7 @@ class _BottomNavigationBarExampleState
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
-            label: '探す',
+            label: 'さがす',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -111,16 +114,5 @@ class Profile extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class BottomNavigationBarProvider with ChangeNotifier {
-  int _currentIndex = 0;
-  // getter
-  get currentIndex => _currentIndex;
-  // setter
-  set currentIndex(int index) {
-    _currentIndex = index;
-    notifyListeners();
   }
 }

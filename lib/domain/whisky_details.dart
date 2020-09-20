@@ -8,6 +8,14 @@ class WhiskyDetails {
   String rakuten = '';
   String amazon = '';
 
-  WhiskyDetails(this.brand, this.imageURL, this.name, this.distillery,
-      this.style, this.alcohol, this.rakuten, this.amazon);
+  WhiskyDetails(
+    this.brand,
+    this.imageURL,
+    this.name,
+    this.distillery,
+    this.style,
+    this.alcohol,
+    this.rakuten,
+    this.amazon,
+  );
 }

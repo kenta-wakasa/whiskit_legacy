@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'presentation/main/main.dart';
 
 class TwitterLoginPage extends StatelessWidget {
   @override

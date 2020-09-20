@@ -1,62 +1,43 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:whiskit_app/domain/home_card.dart';
 import 'package:whiskit_app/domain/users.dart';
-import 'package:whiskit_app/domain/whisky_details.dart';
-import 'package:whiskit_app/domain/whisky_review.dart';
 
-class WhiskyDetailsModel extends ChangeNotifier {
-  WhiskyDetails whiskyDetails;
-  List<WhiskyReview> whiskyReview = [];
+class HomeModel extends ChangeNotifier {
+  List<HomeCard> homeCard = [];
   Users users;
   String uid;
   bool isFavorite = false;
 
-  Future fetchWhiskyDetails(String documentID) async {
+  Future fetchWhiskyReview() async {
     // uid の取得
     SharedPreferences prefs = await SharedPreferences.getInstance();
     uid = prefs.get('uid');
-
-    // ウィスキーの基本情報取得
-    final docWhiskyDetails = await FirebaseFirestore.instance
-        .collection('whisky')
-        .doc(documentID)
-        .get();
-
-    this.whiskyDetails = WhiskyDetails(
-      docWhiskyDetails.data()['brand'],
-      docWhiskyDetails.data()['imageURL'],
-      docWhiskyDetails.data()['name'],
-      docWhiskyDetails.data()['distillery'],
-      docWhiskyDetails.data()['style'],
-      docWhiskyDetails.data()['alcohol'],
-      docWhiskyDetails.data()['rakuten'],
-      docWhiskyDetails.data()['amazon'],
-    );
 
     // ウィスキーのレビュー取得
     final docWhiskyReview = await FirebaseFirestore.instance
         .collection('review')
         .orderBy('timestamp', descending: true)
-        .where('whiskyID', isEqualTo: documentID)
         .get();
 
     // await Future.wait() で　値を取り出せる
-    final whiskyReview = await Future.wait(docWhiskyReview.docs
+    final homeCard = await Future.wait(docWhiskyReview.docs
         .map(
-          (doc) async => WhiskyReview(
+          (doc) async => HomeCard(
             doc.id,
-            await getWhiskyImageURL(doc.data()['whiskyID']),
-            doc.data()['text'],
-            doc.data()['timestamp'],
-            await getUserName(doc.data()['uid']),
             await getAvatarPhoto(doc.data()['uid']),
+            await getUserName(doc.data()['uid']),
+            doc.data()['whiskyID'],
+            await getWhiskyImageURL(doc.data()['whiskyID']),
+            await getWhiskyName(doc.data()['whiskyID']),
+            doc.data()['text'],
             await getFavorite(doc.data()['uid'], doc.id),
           ),
         )
         .toList());
 
-    this.whiskyReview = whiskyReview;
+    this.homeCard = homeCard;
     notifyListeners();
   }
 
@@ -67,6 +48,15 @@ class WhiskyDetailsModel extends ChangeNotifier {
         .doc(whiskyID)
         .get();
     return docWhisky.data()['imageURL'];
+  }
+
+  // whiskyNameを取得する
+  Future<String> getWhiskyName(String whiskyID) async {
+    final docUsers = await FirebaseFirestore.instance
+        .collection('whisky')
+        .doc(whiskyID)
+        .get();
+    return docUsers.data()['name'];
   }
 
   // userNameを取得する
@@ -101,6 +91,7 @@ class WhiskyDetailsModel extends ChangeNotifier {
         .where('uid', isEqualTo: uid)
         .get();
 
+    notifyListeners();
     // docsが空なら新規で追加
     if (doc.docs.isEmpty) {
       await favorite.add({
@@ -113,6 +104,5 @@ class WhiskyDetailsModel extends ChangeNotifier {
         ds.reference.delete();
       }
     }
-    notifyListeners();
   }
 }

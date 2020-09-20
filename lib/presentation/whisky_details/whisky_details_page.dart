@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:whiskit_app/domain/whisky_review.dart';
 import 'package:whiskit_app/presentation/whisky_details/whisky_details_model.dart';
 import 'package:whiskit_app/presentation/whisky_review/whisky_review_page.dart';
 
@@ -25,12 +26,15 @@ class WhiskyDetailsPage extends StatelessWidget {
     return ChangeNotifierProvider<WhiskyDetailsModel>(
       create: (_) => WhiskyDetailsModel()..fetchWhiskyDetails(documentID),
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            name,
-            style: TextStyle(fontWeight: FontWeight.bold),
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(40.0),
+          child: AppBar(
+            backgroundColor: Colors.black54,
+            title: Text(
+              name,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           ),
-          backgroundColor: Colors.black87,
         ),
         body: Consumer<WhiskyDetailsModel>(builder: (context, model, child) {
           // ?.を使うことでnullならよばれなくなる
@@ -103,37 +107,10 @@ class WhiskyDetailsPage extends StatelessWidget {
                       Expanded(child: Consumer<WhiskyDetailsModel>(
                         builder: (context, model, child) {
                           final whiskyReview = model.whiskyReview;
-                          final listTiles = whiskyReview
-                              .map(
-                                (whiskyReview) => ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundImage: NetworkImage(whiskyReview
-                                        .avatarPhotoURL), // no matter how big it is, it won't overflow
-                                  ),
-                                  title: Text(
-                                    whiskyReview.userName,
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                  subtitle: Text(whiskyReview.text),
-                                  trailing: SizedBox(
-                                    width: 15,
-                                    height: 15,
-                                    child: IconButton(
-                                        padding: EdgeInsets.all(0.0),
-                                        icon: Icon(
-                                          Icons.favorite,
-                                          size: 15,
-                                        ),
-                                        onPressed: () {}),
-                                  ),
-                                  isThreeLine: true,
-                                ),
-                              )
-                              .toList();
                           return ListView.builder(
-                              itemCount: listTiles.length,
+                              itemCount: whiskyReview.length,
                               itemBuilder: (BuildContext context, int index) {
-                                return _reviewCard(listTiles[index]);
+                                return _reviewCard(whiskyReview[index], model);
                               });
                         },
                       )),
@@ -184,7 +161,33 @@ class WhiskyDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _reviewCard(ListTile listTile) {
-    return Card(child: listTile);
+  Widget _reviewCard(WhiskyReview whiskyReview, WhiskyDetailsModel model) {
+    return Card(
+      child: Column(
+        children: <Widget>[
+          CircleAvatar(
+            backgroundImage: NetworkImage(whiskyReview.avatarPhotoURL),
+            maxRadius: 12,
+          ),
+          Text(whiskyReview.userName),
+          Text(whiskyReview.text),
+          FlatButton(
+              height: 5,
+              minWidth: 1,
+              child: Icon(
+                whiskyReview.isFavorite
+                    ? Icons.favorite
+                    : Icons.favorite_border,
+                size: 16,
+              ),
+              onPressed: () async {
+                model.changeFavorite(
+                  whiskyReview.documentID,
+                );
+                whiskyReview.isFavorite = !whiskyReview.isFavorite;
+              }),
+        ],
+      ),
+    );
   }
 }

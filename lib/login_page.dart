@@ -56,7 +56,7 @@ class LoginPage extends StatelessWidget {
   Future _showDialog(
     BuildContext context,
     String title,
-  ) {
+  ) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
