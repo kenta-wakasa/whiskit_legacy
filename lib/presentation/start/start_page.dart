@@ -4,6 +4,10 @@ import 'package:whiskit_app/presentation/start/start_model.dart';
 
 import '../main/main.dart';
 
+// https://whiskit-7699f.firebaseapp.com/__/auth/handler
+// twitterkit-n6u2grmRwhTm7roImQtZmb3J6://
+// twittersdk://
+
 class StartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

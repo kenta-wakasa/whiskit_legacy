@@ -52,6 +52,7 @@ class WhiskyDetailsModel extends ChangeNotifier {
             await getUserName(doc.data()['uid']),
             await getAvatarPhoto(doc.data()['uid']),
             await getFavorite(doc.data()['uid'], doc.id),
+            doc.data()['favoriteCount'],
           ),
         )
         .toList());
@@ -94,25 +95,77 @@ class WhiskyDetailsModel extends ChangeNotifier {
   }
 
   Future changeFavorite(String documentID) async {
+    notifyListeners();
     // レビューに対するいいねがあれば削除、なければ追加する
     final favorite = FirebaseFirestore.instance.collection('favorite');
-    final doc = await favorite
+    final docFavorite = await favorite
         .where('reviewID', isEqualTo: documentID)
         .where('uid', isEqualTo: uid)
         .get();
 
+    final review =
+        FirebaseFirestore.instance.collection('review').doc(documentID);
     // docsが空なら新規で追加
-    if (doc.docs.isEmpty) {
+    if (docFavorite.docs.isEmpty) {
       await favorite.add({
         'uid': uid,
         'reviewID': documentID,
       });
+      // reviewのfavorite数を増やす
+      return FirebaseFirestore.instance
+          .runTransaction((transaction) async {
+            // Get the document
+            DocumentSnapshot snapshot = await transaction.get(review);
+
+            if (!snapshot.exists) {
+              throw Exception("User does not exist!");
+            }
+
+            // Update the follower count based on the current count
+            // Note: this could be done without a transaction
+            // by updating the population using FieldValue.increment()
+
+            int favoriteCount = snapshot.data()['favoriteCount'] + 1;
+
+            // Perform an update on the document
+            transaction.update(review, {'favoriteCount': favoriteCount});
+
+            // Return the new count
+            return favoriteCount;
+          })
+          .then((value) => print("Follower count updated to $value"))
+          .catchError(
+              (error) => print("Failed to update user followers: $error"));
       // docsに値があればそれらを削除
     } else {
-      for (DocumentSnapshot ds in doc.docs) {
+      for (DocumentSnapshot ds in docFavorite.docs) {
         ds.reference.delete();
+        // reviewのfavorite数を減らす
+        return FirebaseFirestore.instance
+            .runTransaction((transaction) async {
+              // Get the document
+              DocumentSnapshot snapshot = await transaction.get(review);
+
+              if (!snapshot.exists) {
+                throw Exception("User does not exist!");
+              }
+
+              // Update the follower count based on the current count
+              // Note: this could be done without a transaction
+              // by updating the population using FieldValue.increment()
+
+              int favoriteCount = snapshot.data()['favoriteCount'] - 1;
+
+              // Perform an update on the document
+              transaction.update(review, {'favoriteCount': favoriteCount});
+
+              // Return the new count
+              return favoriteCount;
+            })
+            .then((value) => print("Favorite  count updated to $value"))
+            .catchError(
+                (error) => print("Failed to update user Favorite : $error"));
       }
     }
-    notifyListeners();
   }
 }

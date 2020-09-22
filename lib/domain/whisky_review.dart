@@ -8,6 +8,7 @@ class WhiskyReview {
   String userName = '';
   String avatarPhotoURL = '';
   bool isFavorite = false;
+  int favoriteCount = 0;
 
   WhiskyReview(
     this.documentID,
@@ -17,5 +18,6 @@ class WhiskyReview {
     this.userName,
     this.avatarPhotoURL,
     this.isFavorite,
+    this.favoriteCount,
   );
 }

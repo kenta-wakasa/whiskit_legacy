@@ -46,76 +46,100 @@ class WhiskyDetailsPage extends StatelessWidget {
           this.rakuten = model.whiskyDetails?.rakuten;
           this.amazon = model.whiskyDetails?.amazon;
 
-          final sizedBoxWidth = 250.0;
           // 三項演算子で値がnullならContainerを実行するように
           return imageURL == null
               ? Center(child: Container(child: CircularProgressIndicator()))
               : Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Center(
-                    child: Column(children: <Widget>[
-                      Image.network(
-                        imageURL,
-                        height: 150,
-                      ),
-                      SizedBox(height: 15),
-                      Text(
-                        name,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 20),
-                      DefaultTextStyle.merge(
-                        style: TextStyle(fontSize: 12),
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              width: sizedBoxWidth,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Text('蒸溜所'),
-                                  Text(distillery)
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            SizedBox(
-                              width: sizedBoxWidth,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[Text('スタイル'), Text(style)],
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            SizedBox(
-                              width: sizedBoxWidth,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Text('アルコール度数'),
-                                  Text(alcohol + '%')
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: 20),
-                          ],
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(children: <Widget>[
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              top: 0.0, right: 0.0, bottom: 8.0, left: 20.0),
+                          child: Image.network(
+                            imageURL,
+                            height: 120,
+                          ),
                         ),
-                      ),
-                      Expanded(child: Consumer<WhiskyDetailsModel>(
-                        builder: (context, model, child) {
-                          final whiskyReview = model.whiskyReview;
-                          return ListView.builder(
-                              itemCount: whiskyReview.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return _reviewCard(whiskyReview[index], model);
-                              });
-                        },
-                      )),
-                    ]),
-                  ),
+                        Expanded(
+                          child: Column(
+                            children: <Widget>[
+                              Text(
+                                name,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(
+                                height: 16,
+                              ),
+                              DefaultTextStyle.merge(
+                                style: TextStyle(fontSize: 12),
+                                child: Column(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 4.0,
+                                          right: 24.0,
+                                          bottom: 0.0,
+                                          left: 24.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          Text('蒸溜所'),
+                                          Text(distillery),
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 4.0,
+                                          right: 24.0,
+                                          bottom: 0.0,
+                                          left: 24.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          Text('スタイル'),
+                                          Text(style)
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 4.0,
+                                          right: 24.0,
+                                          bottom: 0.0,
+                                          left: 24.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          Text('アルコール度数'),
+                                          Text(alcohol + '%')
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    Expanded(child: Consumer<WhiskyDetailsModel>(
+                      builder: (context, model, child) {
+                        final whiskyReview = model.whiskyReview;
+                        return ListView.builder(
+                            itemCount: whiskyReview.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return _reviewCard(whiskyReview[index], model);
+                            });
+                      },
+                    )),
+                  ]),
                 );
         }),
         persistentFooterButtons: <Widget>[
@@ -135,6 +159,9 @@ class WhiskyDetailsPage extends StatelessWidget {
             child: Text("楽天で見る", style: TextStyle(fontWeight: FontWeight.bold)),
             color: Colors.red,
             shape: StadiumBorder(),
+          ),
+          SizedBox(
+            width: 4,
           ),
         ],
         floatingActionButton:
@@ -163,30 +190,72 @@ class WhiskyDetailsPage extends StatelessWidget {
 
   Widget _reviewCard(WhiskyReview whiskyReview, WhiskyDetailsModel model) {
     return Card(
-      child: Column(
-        children: <Widget>[
-          CircleAvatar(
-            backgroundImage: NetworkImage(whiskyReview.avatarPhotoURL),
-            maxRadius: 12,
-          ),
-          Text(whiskyReview.userName),
-          Text(whiskyReview.text),
-          FlatButton(
-              height: 5,
-              minWidth: 1,
-              child: Icon(
-                whiskyReview.isFavorite
-                    ? Icons.favorite
-                    : Icons.favorite_border,
-                size: 16,
-              ),
-              onPressed: () async {
-                model.changeFavorite(
-                  whiskyReview.documentID,
-                );
-                whiskyReview.isFavorite = !whiskyReview.isFavorite;
-              }),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    CircleAvatar(
+                      backgroundImage:
+                          NetworkImage(whiskyReview.avatarPhotoURL),
+                      maxRadius: 12,
+                    ),
+                    SizedBox(
+                      width: 4,
+                    ),
+                    Text(
+                      whiskyReview.userName,
+                      style: TextStyle(fontSize: 10),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: IconButton(
+                          splashRadius: 16,
+                          icon: Icon(
+                            whiskyReview.isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            size: 16,
+                          ),
+                          onPressed: () async {
+                            if (whiskyReview.isFavorite) {
+                              whiskyReview.favoriteCount -= 1;
+                            } else {
+                              whiskyReview.favoriteCount += 1;
+                            }
+                            whiskyReview.isFavorite = !whiskyReview.isFavorite;
+                            model.changeFavorite(
+                              whiskyReview.documentID,
+                            );
+                          }),
+                    ),
+                    Text(
+                      whiskyReview.favoriteCount.toString(),
+                      style: TextStyle(fontSize: 10),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 8,
+            ),
+            Text(
+              whiskyReview.text,
+              style: TextStyle(fontSize: 10),
+            ),
+          ],
+        ),
       ),
     );
   }

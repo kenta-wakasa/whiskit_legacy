@@ -9,6 +9,16 @@ class SettingPage extends StatelessWidget {
     return ChangeNotifierProvider<SettingModel>(
       create: (_) => SettingModel(),
       child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(40.0),
+          child: AppBar(
+            backgroundColor: Colors.black54,
+            title: Text(
+              '設定',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
         body: Consumer<SettingModel>(builder: (context, model, child) {
           return Center(
             child: RaisedButton(

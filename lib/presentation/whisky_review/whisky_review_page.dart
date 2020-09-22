@@ -11,30 +11,35 @@ class WhiskyReviewPage extends StatelessWidget {
     return ChangeNotifierProvider<WhiskyReviewModel>(
       create: (_) => WhiskyReviewModel(),
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            name,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        resizeToAvoidBottomPadding: false,
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(40.0),
+          child: AppBar(
+            backgroundColor: Colors.black54,
+            title: Text(
+              name,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            actions: <Widget>[
+              Consumer<WhiskyReviewModel>(builder: (context, model, child) {
+                return FlatButton(
+                  minWidth: 5,
+                  onPressed: () async {
+                    try {
+                      await model.addReviewToFirebase(documentID);
+                      await _showDialog(context, '投稿しました！');
+                      Navigator.of(context).pop();
+                    } catch (e) {
+                      _showDialog(context, e.toString());
+                    }
+                  },
+                  child: Text(
+                    '投稿',
+                  ),
+                );
+              })
+            ],
           ),
-          actions: <Widget>[
-            Consumer<WhiskyReviewModel>(builder: (context, model, child) {
-              return FlatButton(
-                onPressed: () async {
-                  try {
-                    await model.addReviewToFirebase(documentID);
-                    await _showDialog(context, '投稿しました！');
-                    Navigator.of(context).pop();
-                  } catch (e) {
-                    _showDialog(context, e.toString());
-                  }
-                },
-                child: Text(
-                  '投稿',
-                ),
-              );
-            })
-          ],
-          backgroundColor: Colors.black87,
         ),
         body: Consumer<WhiskyReviewModel>(builder: (context, model, child) {
           return Padding(

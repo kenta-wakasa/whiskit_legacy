@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:whiskit_app/presentation/my/my_page.dart';
 import 'package:whiskit_app/presentation/setting/setting_page.dart';
 import 'package:whiskit_app/presentation/start/start_page.dart';
 import 'package:whiskit_app/presentation/whisky_list/whisky_list_page.dart';
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         primaryColor: Colors.lightBlue[800],
         accentColor: Colors.cyan[600],
+        textTheme: TextTheme(),
       ),
       home: ChangeNotifierProvider<BottomNavigationBarProvider>(
         child: BottomNavigationBarExample(),
@@ -53,7 +55,7 @@ class _BottomNavigationBarExampleState
   var currentTab = [
     HomePage(),
     WhiskyListPage(),
-    Profile(),
+    MyPage(),
     SettingPage(),
   ];
 
@@ -92,26 +94,6 @@ class _BottomNavigationBarExampleState
           )
         ],
         type: BottomNavigationBarType.fixed,
-      ),
-    );
-  }
-}
-
-class Profile extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Container(
-          alignment: Alignment.center,
-          height: 300,
-          width: 300,
-          child: Text(
-            "マイページ",
-            style: TextStyle(color: Colors.white, fontSize: 30),
-          ),
-          color: Colors.blue,
-        ),
       ),
     );
   }

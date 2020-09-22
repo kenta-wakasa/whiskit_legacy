@@ -17,6 +17,7 @@ class WhiskyReviewModel extends ChangeNotifier {
       'timestamp': Timestamp.now(),
       'uid': uid,
       'whiskyID': whiskyID,
+      'favoriteCount': 0,
     });
   }
 }

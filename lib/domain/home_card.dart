@@ -16,6 +16,9 @@ class HomeCard {
 
   // 自分がお気に入り登録しているか
   bool isFavorite = false;
+  // お気に入りの数
+  int favoriteCount = 0;
+
   HomeCard(
     this.reviewID,
     this.avatarPhotoURL,
@@ -25,5 +28,6 @@ class HomeCard {
     this.whiskyName,
     this.text,
     this.isFavorite,
+    this.favoriteCount,
   );
 }

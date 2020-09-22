@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:whiskit_app/domain/whisky.dart';
 import 'package:whiskit_app/presentation/whisky_details/whisky_details_page.dart';
 import 'package:whiskit_app/presentation/whisky_list/whisky_list_model.dart';
 
@@ -52,55 +53,76 @@ class WhiskyListPage extends StatelessWidget {
 
 class TabPage extends StatelessWidget {
   final String country;
-
   const TabPage({Key key, this.country}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<WhiskyListModel>(
       create: (_) => WhiskyListModel()..fetchWhisky(country),
-      child: Stack(
-        children: [
-          Scaffold(
-            body: Consumer<WhiskyListModel>(
-              builder: (context, model, child) {
-                final whisky = model.whisky;
-                final listTiles = whisky
-                    .map(
-                      (whisky) => ListTile(
-                        onTap: () async {
-                          await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => WhiskyDetailsPage(
-                                    documentID: whisky.documentID,
-                                    name: whisky.name),
-                              ));
-                        },
-                        title: Image.network(whisky.imageURL),
-                      ),
-                    )
-                    .toList();
-                return GridView.count(
-                  scrollDirection: Axis.vertical,
-                  crossAxisCount: 5,
-                  padding: const EdgeInsets.all(10),
-                  childAspectRatio: 4 / 5,
-                  children: listTiles,
-                );
-              },
-            ),
-          ),
-          Consumer<WhiskyListModel>(builder: (context, model, child) {
-            return model.isLoading
+      child: Scaffold(
+        body: Consumer<WhiskyListModel>(
+          builder: (context, model, child) {
+            return model.whisky == null
                 ? Container(
                     child: Center(
                       child: CircularProgressIndicator(),
                     ),
                   )
-                : SizedBox();
-          })
-        ],
+                : GridView.builder(
+                    controller: getItem(model),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 8,
+                      childAspectRatio: 2 / 5,
+                    ),
+                    itemCount: model.whisky.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return _whiskyCard(context, model.whisky[index]);
+                    });
+          },
+        ),
+      ),
+    );
+  }
+
+  // スクロールを監視してページングする
+  getItem(WhiskyListModel model) {
+    ScrollController _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      final maxScrollExtent = _scrollController.position.maxScrollExtent;
+      final currentPosition = _scrollController.position.pixels;
+      if (maxScrollExtent > 0 && (maxScrollExtent + 50.0) <= currentPosition) {
+        model.item += 50;
+        model.fetchWhisky(country);
+      }
+    });
+    return _scrollController;
+  }
+
+  Widget _whiskyCard(BuildContext context, Whisky whisky) {
+    return Card(
+      margin: EdgeInsets.symmetric(
+        vertical: 2,
+        horizontal: 2,
+      ),
+      child: InkWell(
+        onTap: () async {
+          await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => WhiskyDetailsPage(
+                  documentID: whisky.documentID,
+                  name: whisky.name,
+                ),
+              ));
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: Image.network(whisky.imageURL),
+            ),
+          ],
+        ),
       ),
     );
   }

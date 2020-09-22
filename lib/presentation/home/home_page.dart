@@ -24,11 +24,13 @@ class HomePage extends StatelessWidget {
           body: Consumer<HomeModel>(
             builder: (context, model, child) {
               final homeCard = model.homeCard;
-              return ListView.builder(
-                  itemCount: homeCard.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return _reviewCard(homeCard[index], model, context);
-                  });
+              return homeCard.length == 0
+                  ? Center(child: Container(child: CircularProgressIndicator()))
+                  : ListView.builder(
+                      itemCount: homeCard.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return _reviewCard(homeCard[index], model, context);
+                      });
             },
           ),
         ));
@@ -68,7 +70,7 @@ class HomePage extends StatelessWidget {
                         padding: const EdgeInsets.all(4.0),
                         child: Text(
                           homeCard.userName,
-                          style: TextStyle(fontSize: 12),
+                          style: TextStyle(fontSize: 10),
                         ),
                       ),
                     ],
@@ -86,14 +88,19 @@ class HomePage extends StatelessWidget {
                             size: 16,
                           ),
                           onPressed: () async {
+                            if (homeCard.isFavorite) {
+                              homeCard.favoriteCount -= 1;
+                            } else {
+                              homeCard.favoriteCount += 1;
+                            }
+                            homeCard.isFavorite = !homeCard.isFavorite;
                             model.changeFavorite(
                               homeCard.reviewID,
                             );
-                            homeCard.isFavorite = !homeCard.isFavorite;
                           },
                         ),
                       ),
-                      Text('120'),
+                      Text(homeCard.favoriteCount.toString()),
                     ],
                   ),
                 ],
@@ -103,26 +110,33 @@ class HomePage extends StatelessWidget {
                 children: <Widget>[
                   Image.network(
                     homeCard.whiskyImageURL,
-                    width: 64,
+                    width: 40,
                   ),
                   SizedBox(
                     width: 12,
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        homeCard.whiskyName,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          homeCard.whiskyName,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 12,
-                      ),
-                      Text(homeCard.text),
-                    ],
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Text(
+                          homeCard.text,
+                          style: TextStyle(
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
