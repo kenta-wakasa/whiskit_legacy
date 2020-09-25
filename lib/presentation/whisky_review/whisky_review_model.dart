@@ -9,12 +9,19 @@ class WhiskyReviewModel extends ChangeNotifier {
   Future addReviewToFirebase(String whiskyID) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     uid = prefs.getString('uid');
+
+    // ToDo: 文字数制限をかける
     if (reviewText.isEmpty) {
       throw ('感想を入力してください');
     }
-    FirebaseFirestore.instance.collection('review').add({
+    // whisky以下のサブコレクションとしてreviewを追加する
+    FirebaseFirestore.instance
+        .collection('whisky')
+        .doc(whiskyID)
+        .collection('review')
+        .add({
       'text': reviewText,
-      'timestamp': Timestamp.now(),
+      'createdAt': Timestamp.now(),
       'uid': uid,
       'whiskyID': whiskyID,
       'favoriteCount': 0,

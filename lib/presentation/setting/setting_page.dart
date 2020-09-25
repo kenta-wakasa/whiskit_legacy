@@ -22,11 +22,16 @@ class SettingPage extends StatelessWidget {
         body: Consumer<SettingModel>(builder: (context, model, child) {
           return Center(
             child: RaisedButton(
-                child: Text("Sign out with Twitter"),
+                child: Text(
+                  "ログアウト",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 color: Color(0xFF1DA1F2),
                 textColor: Colors.white,
                 onPressed: () async {
-                  await model.signOutWithTwitter();
+                  await model.signOut();
                   // StartPageに遷移する
                   await Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => StartPage()));

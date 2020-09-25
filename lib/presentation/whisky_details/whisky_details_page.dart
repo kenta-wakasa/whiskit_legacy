@@ -228,15 +228,7 @@ class WhiskyDetailsPage extends StatelessWidget {
                             size: 16,
                           ),
                           onPressed: () async {
-                            if (whiskyReview.isFavorite) {
-                              whiskyReview.favoriteCount -= 1;
-                            } else {
-                              whiskyReview.favoriteCount += 1;
-                            }
-                            whiskyReview.isFavorite = !whiskyReview.isFavorite;
-                            model.changeFavorite(
-                              whiskyReview.documentID,
-                            );
+                            await model.changeFavorite(whiskyReview);
                           }),
                     ),
                     Text(

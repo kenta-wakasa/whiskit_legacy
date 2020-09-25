@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:whiskit_app/domain/whisky.dart';
+import 'package:whiskit_app/presentation/edit_profile/edit_profile_page.dart';
 import 'package:whiskit_app/presentation/whisky_details/whisky_details_page.dart';
-
 import 'my_model.dart';
 
 class MyPage extends StatelessWidget {
@@ -18,6 +18,7 @@ class MyPage extends StatelessWidget {
       home: ChangeNotifierProvider<MyModel>(
         create: (_) => MyModel()..getMyInfo(),
         child: Scaffold(
+          resizeToAvoidBottomPadding: false,
           appBar: PreferredSize(
             preferredSize: Size.fromHeight(40.0),
             child: AppBar(
@@ -29,7 +30,7 @@ class MyPage extends StatelessWidget {
             ),
           ),
           body: Consumer<MyModel>(builder: (context, model, child) {
-            return model.whisky.length == 0
+            return model.isLoading
                 ? Center(child: Container(child: CircularProgressIndicator()))
                 : Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -109,7 +110,16 @@ class MyPage extends StatelessWidget {
                                         minWidth: 12,
                                         height: 32,
                                         onPressed: () async {
-                                          /* マイページ編集 */
+                                          await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  // EditProfilePage(),
+                                                  EditProfilePage(),
+                                              fullscreenDialog: true,
+                                            ), //以下を追加
+                                          );
+                                          await model.getMyInfo();
                                         },
                                         child: Text(
                                           '編集',

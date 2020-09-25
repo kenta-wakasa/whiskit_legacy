@@ -5,18 +5,38 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:whiskit_app/domain/whisky.dart';
 
 class MyModel extends ChangeNotifier {
+  List<Whisky> whisky = [];
+
   String uid = '';
   String userName = '';
   String avatarPhotoURL = '';
+
   bool isMe = true;
-  List<Whisky> whisky = [];
-  int reviewCount = 0;
-  int drankWhiskyCount = 0;
-  int favoriteCount = 0;
+  bool isLoading = false;
+
+  int reviewCount;
+  int drankWhiskyCount;
+  int favoriteCount;
 
   Future getMyInfo() async {
+    this.isLoading = true;
+
+    // 値の初期化
+    this.reviewCount = 0;
+    this.drankWhiskyCount = 0;
+    this.favoriteCount = 0;
+    List<String> _drankWhisky = [];
+    List<Whisky> _whisky = [];
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     this.uid = prefs.get('uid');
+
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(this.uid)
+        .get();
+    this.userName = doc.data()['userName'];
+    this.avatarPhotoURL = doc.data()['avatarPhotoURL'];
 
     // レビューから自分のuidと一致するリストを引っ張ってくる
     final docReview = await FirebaseFirestore.instance
@@ -27,38 +47,31 @@ class MyModel extends ChangeNotifier {
     // レビューの数を代入する
     reviewCount = docReview.docs.length;
 
-    List<String> drankWhisky = [];
     docReview.docs.forEach((doc) {
-      drankWhisky.add(doc.data()['whiskyID']);
+      _drankWhisky.add(doc.data()['whiskyID']);
       favoriteCount += doc.data()['favoriteCount'];
     });
 
     // 重複を削除する
-    drankWhisky = drankWhisky.toSet().toList();
-
+    _drankWhisky = _drankWhisky.toSet().toList();
     // 飲んだウイスキー数を代入する
-    drankWhiskyCount = drankWhisky.length;
+    drankWhiskyCount = _drankWhisky.length;
 
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(this.uid)
-        .get();
-
-    this.userName = doc.data()['userName'];
-    this.avatarPhotoURL = doc.data()['avatarPhotoURL'];
-
-    for (String id in drankWhisky) {
+    // ウィスキーリストの作成
+    for (String id in _drankWhisky) {
       final doc =
           await FirebaseFirestore.instance.collection('whisky').doc(id).get();
-      this.whisky.add(
-            Whisky(
-              doc.data()['name'],
-              doc.data()['imageURL'],
-              doc.id,
-            ),
-          );
+      _whisky.add(
+        Whisky(
+          doc.data()['name'],
+          doc.data()['imageURL'],
+          doc.id,
+        ),
+      );
     }
+    this.whisky = _whisky;
 
+    this.isLoading = false;
     notifyListeners();
   }
 }

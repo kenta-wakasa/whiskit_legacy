@@ -12,7 +12,7 @@ class WhiskyDetailsModel extends ChangeNotifier {
   String uid;
   bool isFavorite = false;
 
-  Future fetchWhiskyDetails(String documentID) async {
+  Future fetchWhiskyDetails(String whiskyID) async {
     // uid の取得
     SharedPreferences prefs = await SharedPreferences.getInstance();
     uid = prefs.get('uid');
@@ -20,7 +20,7 @@ class WhiskyDetailsModel extends ChangeNotifier {
     // ウィスキーの基本情報取得
     final docWhiskyDetails = await FirebaseFirestore.instance
         .collection('whisky')
-        .doc(documentID)
+        .doc(whiskyID)
         .get();
 
     this.whiskyDetails = WhiskyDetails(
@@ -36,136 +36,112 @@ class WhiskyDetailsModel extends ChangeNotifier {
 
     // ウィスキーのレビュー取得
     final docWhiskyReview = await FirebaseFirestore.instance
+        .collection('whisky')
+        .doc(whiskyID)
         .collection('review')
-        .orderBy('timestamp', descending: true)
-        .where('whiskyID', isEqualTo: documentID)
+        .orderBy('createdAt', descending: true)
         .get();
 
     // await Future.wait() で　値を取り出せる
-    final whiskyReview = await Future.wait(docWhiskyReview.docs
+    this.whiskyReview = await Future.wait(docWhiskyReview.docs
         .map(
           (doc) async => WhiskyReview(
             doc.id,
-            await getWhiskyImageURL(doc.data()['whiskyID']),
+            doc.data()['whiskyID'],
             doc.data()['text'],
-            doc.data()['timestamp'],
-            await getUserName(doc.data()['uid']),
-            await getAvatarPhoto(doc.data()['uid']),
-            await getFavorite(doc.data()['uid'], doc.id),
+            await _getData('users', doc.data()['uid'], 'userName'),
+            await _getData('users', doc.data()['uid'], 'avatarPhotoURL'),
+            await getFavorite(doc.id),
             doc.data()['favoriteCount'],
           ),
         )
         .toList());
-
-    this.whiskyReview = whiskyReview;
     notifyListeners();
   }
 
-  // WhiskyImageURLを取得する
-  Future<String> getWhiskyImageURL(String whiskyID) async {
-    final docWhisky = await FirebaseFirestore.instance
-        .collection('whisky')
-        .doc(whiskyID)
+  // collection, documentID, filed名　を渡してデータを得る
+  Future _getData(
+    String collectionName,
+    String documentID,
+    String fieldName,
+  ) async {
+    final doc = await FirebaseFirestore.instance
+        .collection(collectionName)
+        .doc(documentID)
         .get();
-    return docWhisky.data()['imageURL'];
-  }
-
-  // userNameを取得する
-  Future<String> getUserName(String uid) async {
-    final docUsers =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    return docUsers.data()['userName'];
-  }
-
-  // avatarPhotoURLを取得する
-  Future<String> getAvatarPhoto(String uid) async {
-    final docUsers =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    return docUsers.data()['avatarPhotoURL'];
+    return doc.data()[fieldName];
   }
 
   // 空でなければtrueを返す
-  Future<bool> getFavorite(String uid, String reviewID) async {
+  Future<bool> getFavorite(String reviewID) async {
     final favorite = FirebaseFirestore.instance.collection('favorite');
     final doc = await favorite
         .where('reviewID', isEqualTo: reviewID)
-        .where('uid', isEqualTo: uid)
+        .where('uid', isEqualTo: this.uid)
         .get();
     return doc.docs.isNotEmpty;
   }
 
-  Future changeFavorite(String documentID) async {
-    notifyListeners();
+  Future changeFavorite(WhiskyReview whiskyReview) async {
     // レビューに対するいいねがあれば削除、なければ追加する
     final favorite = FirebaseFirestore.instance.collection('favorite');
     final docFavorite = await favorite
-        .where('reviewID', isEqualTo: documentID)
-        .where('uid', isEqualTo: uid)
+        .where('reviewID', isEqualTo: whiskyReview.reviewID)
+        .where('uid', isEqualTo: this.uid)
         .get();
 
-    final review =
-        FirebaseFirestore.instance.collection('review').doc(documentID);
-    // docsが空なら新規で追加
-    if (docFavorite.docs.isEmpty) {
-      await favorite.add({
-        'uid': uid,
-        'reviewID': documentID,
-      });
-      // reviewのfavorite数を増やす
+    final review = FirebaseFirestore.instance
+        .collection('whisky')
+        .doc(whiskyReview.whiskyID)
+        .collection('review')
+        .doc(whiskyReview.reviewID);
+
+    // 自分がいいねしていないなら、いいねを追加する
+    if (!whiskyReview.isFavorite) {
       return FirebaseFirestore.instance
           .runTransaction((transaction) async {
-            // Get the document
-            DocumentSnapshot snapshot = await transaction.get(review);
+            await favorite.add(
+              {
+                'uid': uid,
+                'reviewID': whiskyReview.reviewID,
+              },
+            );
+            whiskyReview.favoriteCount += 1;
 
-            if (!snapshot.exists) {
-              throw Exception("User does not exist!");
-            }
-
-            // Update the follower count based on the current count
-            // Note: this could be done without a transaction
-            // by updating the population using FieldValue.increment()
-
-            int favoriteCount = snapshot.data()['favoriteCount'] + 1;
-
-            // Perform an update on the document
-            transaction.update(review, {'favoriteCount': favoriteCount});
-
+            // いいね数を減らす
+            transaction.update(
+              review,
+              {
+                'favoriteCount': whiskyReview.favoriteCount,
+              },
+            );
+            whiskyReview.isFavorite = true;
             // Return the new count
-            return favoriteCount;
+            return;
           })
-          .then((value) => print("Follower count updated to $value"))
-          .catchError(
-              (error) => print("Failed to update user followers: $error"));
+          .then((value) => notifyListeners())
+          .catchError((error) => print("いいねの更新に失敗しました : $error"));
       // docsに値があればそれらを削除
     } else {
-      for (DocumentSnapshot ds in docFavorite.docs) {
-        ds.reference.delete();
-        // reviewのfavorite数を減らす
-        return FirebaseFirestore.instance
-            .runTransaction((transaction) async {
-              // Get the document
-              DocumentSnapshot snapshot = await transaction.get(review);
+      // reviewのfavorite数を減らす
+      return FirebaseFirestore.instance
+          .runTransaction((transaction) async {
+            // データ削除
+            docFavorite.docs[0].reference.delete();
 
-              if (!snapshot.exists) {
-                throw Exception("User does not exist!");
-              }
-
-              // Update the follower count based on the current count
-              // Note: this could be done without a transaction
-              // by updating the population using FieldValue.increment()
-
-              int favoriteCount = snapshot.data()['favoriteCount'] - 1;
-
-              // Perform an update on the document
-              transaction.update(review, {'favoriteCount': favoriteCount});
-
-              // Return the new count
-              return favoriteCount;
-            })
-            .then((value) => print("Favorite  count updated to $value"))
-            .catchError(
-                (error) => print("Failed to update user Favorite : $error"));
-      }
+            // いいね数を減らす
+            whiskyReview.favoriteCount -= 1;
+            transaction.update(
+              review,
+              {
+                'favoriteCount': whiskyReview.favoriteCount,
+              },
+            );
+            whiskyReview.isFavorite = false;
+            return;
+          })
+          .then((value) => notifyListeners())
+          .catchError((error) => print("いいねの更新に失敗しました : $error"));
     }
   }
 }

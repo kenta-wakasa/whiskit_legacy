@@ -44,13 +44,15 @@ class HomePage extends StatelessWidget {
       child: InkWell(
         onTap: () async {
           await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => WhiskyDetailsPage(
-                  documentID: homeCard.whiskyID,
-                  name: homeCard.whiskyName,
-                ),
-              ));
+            context,
+            MaterialPageRoute(
+              builder: (context) => WhiskyDetailsPage(
+                documentID: homeCard.whiskyID,
+                name: homeCard.whiskyName,
+              ),
+            ),
+          );
+          await model.fetchWhiskyReview();
         },
         child: Padding(
           padding: const EdgeInsets.only(
@@ -88,14 +90,8 @@ class HomePage extends StatelessWidget {
                             size: 16,
                           ),
                           onPressed: () async {
-                            if (homeCard.isFavorite) {
-                              homeCard.favoriteCount -= 1;
-                            } else {
-                              homeCard.favoriteCount += 1;
-                            }
-                            homeCard.isFavorite = !homeCard.isFavorite;
-                            model.changeFavorite(
-                              homeCard.reviewID,
+                            await model.changeFavorite(
+                              homeCard,
                             );
                           },
                         ),
