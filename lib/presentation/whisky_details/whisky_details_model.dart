@@ -51,7 +51,7 @@ class WhiskyDetailsModel extends ChangeNotifier {
             doc.data()['text'],
             await _getData('users', doc.data()['uid'], 'userName'),
             await _getData('users', doc.data()['uid'], 'avatarPhotoURL'),
-            await getFavorite(doc.id),
+            await _getFavorite(doc.id),
             doc.data()['favoriteCount'],
           ),
         )
@@ -72,76 +72,120 @@ class WhiskyDetailsModel extends ChangeNotifier {
     return doc.data()[fieldName];
   }
 
-  // 空でなければtrueを返す
-  Future<bool> getFavorite(String reviewID) async {
-    final favorite = FirebaseFirestore.instance.collection('favorite');
-    final doc = await favorite
-        .where('reviewID', isEqualTo: reviewID)
-        .where('uid', isEqualTo: this.uid)
+  // 自分がそのレビューをいいねしているか
+  Future<bool> _getFavorite(String reviewID) async {
+    final dataLikedReview = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(this.uid)
+        .collection('likedReview')
+        .doc(reviewID)
         .get();
-    return doc.docs.isNotEmpty;
+    return dataLikedReview.exists;
   }
 
-  Future changeFavorite(WhiskyReview whiskyReview) async {
-    // レビューに対するいいねがあれば削除、なければ追加する
-    final favorite = FirebaseFirestore.instance.collection('favorite');
-    final docFavorite = await favorite
-        .where('reviewID', isEqualTo: whiskyReview.reviewID)
-        .where('uid', isEqualTo: this.uid)
-        .get();
+  // レビューに対して自分がいいねしていなければいいねを追加
+  Future addFavorite(WhiskyReview whiskyReview) async {
+    whiskyReview.isFavorite = true;
+    notifyListeners();
 
-    final review = FirebaseFirestore.instance
+    // reviewにいいねをぶら下げる
+    // whisky/{whiskyDoc}/review/{reviewDoc}/likedUsers
+    final docLikedUsers = FirebaseFirestore.instance
+        .collection('whisky')
+        .doc(whiskyReview.whiskyID)
+        .collection('review')
+        .doc(whiskyReview.reviewID)
+        .collection('likedUsers')
+        .doc(this.uid);
+
+    // usersにいいねをぶら下げる
+    // users/{usersDoc}/likedReview
+    // whiskyIDを要素に持たせると検索が楽か
+    final docLikedReview = FirebaseFirestore.instance
+        .collection('users')
+        .doc(this.uid)
+        .collection('likedReview')
+        .doc(whiskyReview.reviewID);
+
+    // 処理をバッチでまとめる
+    WriteBatch _batch = FirebaseFirestore.instance.batch();
+    _batch.set(
+      docLikedUsers,
+      {
+        'uid': this.uid,
+        'createdAt': Timestamp.now(),
+      },
+    );
+    _batch.set(
+      docLikedReview,
+      {
+        'uid': this.uid,
+        'reviewID': whiskyReview.reviewID,
+        'whiskyID': whiskyReview.whiskyID,
+        'createdAt': Timestamp.now(),
+      },
+    );
+
+    // favoriteCount を増やす
+    final docReview = FirebaseFirestore.instance
         .collection('whisky')
         .doc(whiskyReview.whiskyID)
         .collection('review')
         .doc(whiskyReview.reviewID);
 
-    // 自分がいいねしていないなら、いいねを追加する
-    if (!whiskyReview.isFavorite) {
-      return FirebaseFirestore.instance
-          .runTransaction((transaction) async {
-            await favorite.add(
-              {
-                'uid': uid,
-                'reviewID': whiskyReview.reviewID,
-              },
-            );
-            whiskyReview.favoriteCount += 1;
+    whiskyReview.favoriteCount += 1;
+    _batch.update(
+      docReview,
+      {
+        'favoriteCount': whiskyReview.favoriteCount,
+      },
+    );
 
-            // いいね数を減らす
-            transaction.update(
-              review,
-              {
-                'favoriteCount': whiskyReview.favoriteCount,
-              },
-            );
-            whiskyReview.isFavorite = true;
-            // Return the new count
-            return;
-          })
-          .then((value) => notifyListeners())
-          .catchError((error) => print("いいねの更新に失敗しました : $error"));
-      // docsに値があればそれらを削除
-    } else {
-      // reviewのfavorite数を減らす
-      return FirebaseFirestore.instance
-          .runTransaction((transaction) async {
-            // データ削除
-            docFavorite.docs[0].reference.delete();
+    await _batch.commit().then((value) => print('success!'));
 
-            // いいね数を減らす
-            whiskyReview.favoriteCount -= 1;
-            transaction.update(
-              review,
-              {
-                'favoriteCount': whiskyReview.favoriteCount,
-              },
-            );
-            whiskyReview.isFavorite = false;
-            return;
-          })
-          .then((value) => notifyListeners())
-          .catchError((error) => print("いいねの更新に失敗しました : $error"));
-    }
+    notifyListeners();
+  }
+
+  // レビューに対して自分がいいねしていなければいいねを追加
+  Future deleteFavorite(WhiskyReview whiskyReview) async {
+    whiskyReview.isFavorite = false;
+    notifyListeners();
+
+    final docLikedUsers = FirebaseFirestore.instance
+        .collection('whisky')
+        .doc(whiskyReview.whiskyID)
+        .collection('review')
+        .doc(whiskyReview.reviewID)
+        .collection('likedUsers')
+        .doc(this.uid);
+    final docLikedReview = FirebaseFirestore.instance
+        .collection('users')
+        .doc(this.uid)
+        .collection('likedReview')
+        .doc(whiskyReview.reviewID);
+
+    // 処理をバッチでまとめる
+    WriteBatch _batch = FirebaseFirestore.instance.batch();
+    _batch.delete(docLikedUsers);
+    _batch.delete(docLikedReview);
+
+    // favoriteCount を減らす
+    final docReview = FirebaseFirestore.instance
+        .collection('whisky')
+        .doc(whiskyReview.whiskyID)
+        .collection('review')
+        .doc(whiskyReview.reviewID);
+
+    whiskyReview.favoriteCount -= 1;
+    _batch.update(
+      docReview,
+      {
+        'favoriteCount': whiskyReview.favoriteCount,
+      },
+    );
+
+    await _batch.commit().then((value) => print('success!'));
+
+    notifyListeners();
   }
 }

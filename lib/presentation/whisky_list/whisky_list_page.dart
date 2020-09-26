@@ -31,6 +31,7 @@ class WhiskyListPage extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return DefaultTabController(
+      initialIndex: 2,
       length: _tab.length,
       child: Scaffold(
         appBar: AppBar(
@@ -39,13 +40,15 @@ class WhiskyListPage extends StatelessWidget {
             tabs: _tab,
           ),
         ),
-        body: TabBarView(children: <Widget>[
-          TabPage(country: 'IRISH'),
-          TabPage(country: 'SCOTCH'),
-          TabPage(country: 'JAPANESE'),
-          TabPage(country: 'AMERICAN'),
-          TabPage(country: 'CANADIAN')
-        ]),
+        body: TabBarView(
+          children: <Widget>[
+            TabPage(country: 'IRISH'),
+            TabPage(country: 'SCOTCH'),
+            TabPage(country: 'JAPANESE'),
+            TabPage(country: 'AMERICAN'),
+            TabPage(country: 'CANADIAN'),
+          ],
+        ),
       ),
     );
   }
@@ -68,7 +71,8 @@ class TabPage extends StatelessWidget {
                     ),
                   )
                 : GridView.builder(
-                    controller: getItem(model),
+                    // ToDo: ページングに対応する
+                    // controller: _getItem(model),z
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 8,
                       childAspectRatio: 2 / 5,
@@ -84,13 +88,13 @@ class TabPage extends StatelessWidget {
   }
 
   // スクロールを監視してページングする
-  getItem(WhiskyListModel model) {
+  _getItem(WhiskyListModel model) {
     ScrollController _scrollController = ScrollController();
     _scrollController.addListener(() {
       final maxScrollExtent = _scrollController.position.maxScrollExtent;
       final currentPosition = _scrollController.position.pixels;
       if (maxScrollExtent > 0 && (maxScrollExtent + 50.0) <= currentPosition) {
-        model.item += 50;
+        // model.item += 50;
         model.fetchWhisky(country);
       }
     });

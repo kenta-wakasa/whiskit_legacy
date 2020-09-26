@@ -3,6 +3,7 @@ class HomeCard {
   String reviewID = '';
 
   // ユーザー情報
+  String uid = '';
   String avatarPhotoURL = '';
   String userName = '';
 
@@ -21,6 +22,7 @@ class HomeCard {
 
   HomeCard(
     this.reviewID,
+    this.uid,
     this.avatarPhotoURL,
     this.userName,
     this.whiskyID,

@@ -4,8 +4,6 @@ import 'package:whiskit_app/domain/whisky.dart';
 
 class WhiskyListModel extends ChangeNotifier {
   List<Whisky> whisky = [];
-  bool isLoading = false;
-  int item = 50;
 
   Future fetchWhisky(String country) async {
     final docs = await FirebaseFirestore.instance

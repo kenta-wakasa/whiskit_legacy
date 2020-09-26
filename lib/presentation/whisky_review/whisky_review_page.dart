@@ -55,7 +55,7 @@ class WhiskyReviewPage extends StatelessWidget {
                   maxLines: 3,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: '感想を書く',
+                    labelText: '感想を書いてみる',
                   ),
                 )
               ],

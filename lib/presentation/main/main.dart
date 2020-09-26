@@ -1,7 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:whiskit_app/presentation/my/my_page.dart';
 import 'package:whiskit_app/presentation/setting/setting_page.dart';
 import 'package:whiskit_app/presentation/start/start_page.dart';
@@ -12,10 +12,12 @@ import 'bottom_navigation_bar_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  // uid の存在を確認
-  SharedPreferences prefsRead = await SharedPreferences.getInstance();
-  String _uid = prefsRead.getString('uid');
-  print(_uid);
+
+  // 認証の確認
+  User _user = FirebaseAuth.instance.currentUser;
+  print(_user.uid);
+  final _uid = _user.uid;
+
   // uidが空ならログインページに飛ばす。
   if (_uid == '') {
     runApp(StartPage());

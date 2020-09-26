@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:whiskit_app/domain/home_card.dart';
+import 'package:whiskit_app/presentation/user/user_page.dart';
 import 'package:whiskit_app/presentation/whisky_details/whisky_details_page.dart';
 import 'home_model.dart';
 
-// テンプレート
 class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<HomeModel>(
@@ -62,20 +62,36 @@ class HomePage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: <Widget>[
-                      CircleAvatar(
-                        backgroundImage: NetworkImage(homeCard.avatarPhotoURL),
-                        maxRadius: 12,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Text(
-                          homeCard.userName,
-                          style: TextStyle(fontSize: 10),
+                  InkWell(
+                    onTap: () async {
+                      print(homeCard.uid);
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          //builder: (context) => MyPage(),
+                          builder: (context) => UserPage(
+                            homeCard.uid,
+                            homeCard.userName,
+                          ),
                         ),
-                      ),
-                    ],
+                      );
+                    },
+                    child: Row(
+                      children: <Widget>[
+                        CircleAvatar(
+                          backgroundImage:
+                              NetworkImage(homeCard.avatarPhotoURL),
+                          maxRadius: 12,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            homeCard.userName,
+                            style: TextStyle(fontSize: 10),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   Row(
                     children: [
@@ -90,9 +106,12 @@ class HomePage extends StatelessWidget {
                             size: 16,
                           ),
                           onPressed: () async {
-                            await model.changeFavorite(
-                              homeCard,
-                            );
+                            // すでにいいねしているかで分岐する
+                            if (homeCard.isFavorite) {
+                              await model.deleteFavorite(homeCard);
+                            } else {
+                              await model.addFavorite(homeCard);
+                            }
                           },
                         ),
                       ),

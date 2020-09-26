@@ -10,7 +10,7 @@ _launchURL(url) async {
   if (await canLaunch(url)) {
     await launch(url);
   } else {
-    throw 'Could not Launch $url';
+    throw ('Could not Launch $url');
   }
 }
 
@@ -20,7 +20,7 @@ class WhiskyDetailsPage extends StatelessWidget {
   String rakuten = '';
   String amazon = '';
   // 値を受け取る
-  WhiskyDetailsPage({Key key, this.documentID, this.name}) : super(key: key);
+  WhiskyDetailsPage({this.documentID, this.name});
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<WhiskyDetailsModel>(
@@ -228,7 +228,12 @@ class WhiskyDetailsPage extends StatelessWidget {
                             size: 16,
                           ),
                           onPressed: () async {
-                            await model.changeFavorite(whiskyReview);
+                            // すでにいいねしているかで分岐する
+                            if (whiskyReview.isFavorite) {
+                              await model.deleteFavorite(whiskyReview);
+                            } else {
+                              await model.addFavorite(whiskyReview);
+                            }
                           }),
                     ),
                     Text(

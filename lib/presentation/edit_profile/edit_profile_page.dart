@@ -14,7 +14,7 @@ class EditProfilePage extends StatelessWidget {
           child: AppBar(
             backgroundColor: Colors.black54,
             title: Text(
-              '編集',
+              'プロフィールの編集',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
@@ -81,7 +81,10 @@ class EditProfilePage extends StatelessWidget {
                                 await _showDialog(context, e.toString());
                               }
                             },
-                            child: Text('更新する'),
+                            child: Text(
+                              '更新する',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ),
                       ],

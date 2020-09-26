@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:whiskit_app/domain/users.dart';
 import 'package:whiskit_app/domain/whisky.dart';
 
-class MyModel extends ChangeNotifier {
+class UserModel extends ChangeNotifier {
   List<Whisky> whisky = [];
 
   String uid = FirebaseAuth.instance.currentUser.uid;
@@ -17,7 +17,7 @@ class MyModel extends ChangeNotifier {
   int drankWhiskyCount;
   int favoriteCount;
 
-  Future getMyInfo() async {
+  Future getUserInfo(String userID) async {
     // ロード中の識別
     this.isLoading = true;
 
@@ -28,10 +28,8 @@ class MyModel extends ChangeNotifier {
     List<String> _drankWhiskyID = [];
     List<Whisky> _whisky = [];
 
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(this.uid)
-        .get();
+    final doc =
+        await FirebaseFirestore.instance.collection('users').doc(userID).get();
     this.users = Users(
       await doc.data()['avatarPhotoURL'],
       await doc.data()['userName'],
@@ -40,7 +38,7 @@ class MyModel extends ChangeNotifier {
     // レビューから自分のuidと一致するリストを引っ張ってくる
     final docReview = await FirebaseFirestore.instance
         .collectionGroup('review')
-        .where('uid', isEqualTo: this.uid)
+        .where('uid', isEqualTo: userID)
         .get();
 
     // レビューの数を代入する

@@ -44,13 +44,13 @@ class MyPage extends StatelessWidget {
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: CircleAvatar(
-                                    backgroundImage:
-                                        NetworkImage(model.avatarPhotoURL),
+                                    backgroundImage: NetworkImage(
+                                        model.users.avatarPhotoURL),
                                     maxRadius: 24,
                                   ),
                                 ),
                                 Text(
-                                  model.userName,
+                                  model.users.userName,
                                   style: _textStyle(12),
                                 ),
                               ],
@@ -104,39 +104,49 @@ class MyPage extends StatelessWidget {
                               padding: const EdgeInsets.all(8.0),
                               child: SizedBox(
                                 width: 56,
-                                child: !model.isMe
-                                    ? Container()
-                                    : FlatButton(
-                                        minWidth: 12,
-                                        height: 32,
-                                        onPressed: () async {
-                                          await Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  // EditProfilePage(),
-                                                  EditProfilePage(),
-                                              fullscreenDialog: true,
-                                            ), //以下を追加
-                                          );
-                                          await model.getMyInfo();
-                                        },
-                                        child: Text(
-                                          '編集',
-                                          style: _textStyle(10),
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(8.0)),
-                                          side: BorderSide(color: Colors.white),
-                                        ),
-                                      ),
+                                child: FlatButton(
+                                  minWidth: 12,
+                                  height: 32,
+                                  onPressed: () async {
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            // EditProfilePage(),
+                                            EditProfilePage(),
+                                        fullscreenDialog: true,
+                                      ), //以下を追加
+                                    );
+                                    await model.getMyInfo();
+                                  },
+                                  child: Text(
+                                    '編集',
+                                    style: _textStyle(10),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8.0)),
+                                    side: BorderSide(color: Colors.white),
+                                  ),
+                                ),
                               ),
                             ),
                           ],
                         ),
                         SizedBox(
-                          height: 12,
+                          height: 8,
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              '飲んできたウイスキー',
+                              style: TextStyle(fontSize: 10),
+                            ),
+                            Expanded(child: SizedBox())
+                          ],
+                        ),
+                        SizedBox(
+                          height: 4,
                         ),
                         Expanded(
                           child: GridView.builder(

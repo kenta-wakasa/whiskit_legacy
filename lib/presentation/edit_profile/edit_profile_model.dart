@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -10,13 +11,10 @@ import 'package:whiskit_app/domain/users.dart';
 class EditProfileModel extends ChangeNotifier {
   File imageFile;
   Users user;
-  String uid;
+  String uid = FirebaseAuth.instance.currentUser.uid;
   bool isUploading = false;
 
   Future getUserInfo() async {
-    // uid の取得
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    this.uid = prefs.get('uid');
     final docUsers =
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
     this.user = Users(
